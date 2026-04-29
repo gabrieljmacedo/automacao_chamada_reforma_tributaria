@@ -1,24 +1,31 @@
-from dotenv import load_dotenv 
 import csv
 import os
-import requests
 import time
-
-load_dotenv()
-
+import requests
 import urllib3
+from dotenv import load_dotenv 
+
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 URL = "https://bus-prd.oxxobr.com.br/szi/api/loadItemReforma/"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+ARQUIVO_CSV = os.path.join(BASE_DIR, "mercadorias.csv")
+
+load_dotenv(dotenv_path=ENV_PATH)
+
 API_KEY = os.getenv("API_AUTH_KEY")
+if not API_KEY:
+    raise RuntimeError("API_AUTH_KEY não encontrada no .env. Verifique se o arquivo .env existe e contém API_AUTH_KEY=<valor>")
+
+print("API_KEY:", API_KEY)
 
 HEADERS = {
     "Content-Type": "application/json",
     "api-auth": API_KEY
 }
-
-ARQUIVO_CSV = "mercadorias.csv"
 
 def ler_csv(arquivo):
     dados = []
@@ -37,8 +44,8 @@ def enviar_post(valor):
         URL,
         json=body,
         headers=HEADERS,
-        timeout=30,
-        verify=False
+        timeout=30, 
+        verify=False # SSL Off
     )
 
     return response.status_code, response.text
